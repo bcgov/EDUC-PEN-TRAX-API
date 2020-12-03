@@ -109,20 +109,20 @@ public class TraxAPIControllerTest {
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_TRAX")
+  @WithMockOAuth2Scope(scope = "READ_PEN_TRAX")
   public void testGetStudent_GivenValidStudentNo_ShouldReturnStatusOK() throws Exception {
     this.mockMvc.perform(get("/api/v1/students").param("studNo", studentNo)).andDo(print()).andExpect(status().isOk())
       .andExpect(MockMvcResultMatchers.jsonPath("$.studGiven").value(studentEntity.getStudGiven()));
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_TRAX")
+  @WithMockOAuth2Scope(scope = "READ_PEN_TRAX")
   public void testGetStudent_GivenNoExistStudentNo_ShouldReturnStatusNotFound() throws Exception {
     this.mockMvc.perform(get("/api/v1/students").param("studNo", "12345670")).andDo(print()).andExpect(status().isNotFound());
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_TRAX")
+  @WithMockOAuth2Scope(scope = "READ_PEN_TRAX")
   public void testFindStudXcrse_GivenValidStudentNo_ShouldReturnStatusOK() throws Exception {
     Map<String, String> sortMap = new HashMap<>();
     sortMap.put("studXcrseId.crseLevel", "DESC");
@@ -139,7 +139,7 @@ public class TraxAPIControllerTest {
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_TRAX")
+  @WithMockOAuth2Scope(scope = "READ_PEN_TRAX")
   public void testFindStudXcrse_GivenNoExistStudentNo_ShouldReturnStatusOK() throws Exception {
     MvcResult result = mockMvc
       .perform(get("/api/v1/stud-xcrses/paginated").param("studNo", "12345670")
@@ -151,7 +151,7 @@ public class TraxAPIControllerTest {
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_TRAX")
+  @WithMockOAuth2Scope(scope = "READ_PEN_TRAX")
   public void testFindProvExam_GivenValidStudentNo_ShouldReturnStatusOK() throws Exception {
     Map<String, String> sortMap = new HashMap<>();
     sortMap.put("provExamId.crseLevel", "DESC");
@@ -168,7 +168,7 @@ public class TraxAPIControllerTest {
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_TRAX")
+  @WithMockOAuth2Scope(scope = "READ_PEN_TRAX")
   public void testFindProvExam_GivenNoExistStudentNo_ShouldReturnStatusOK() throws Exception {
     MvcResult result = mockMvc
       .perform(get("/api/v1/prov-exams/paginated").param("studNo", "12345670")
@@ -180,7 +180,7 @@ public class TraxAPIControllerTest {
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_TRAX")
+  @WithMockOAuth2Scope(scope = "READ_PEN_TRAX")
   public void testFindStudGradAssmt_GivenValidStudentNo_ShouldReturnStatusOK() throws Exception {
     Map<String, String> sortMap = new HashMap<>();
     sortMap.put("studGradAssmtId.assmtCode", "DESC");
@@ -197,7 +197,7 @@ public class TraxAPIControllerTest {
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_TRAX")
+  @WithMockOAuth2Scope(scope = "READ_PEN_TRAX")
   public void testFindStudGradAssmt_GivenNoExistStudentNo_ShouldReturnStatusOK() throws Exception {
     MvcResult result = mockMvc
       .perform(get("/api/v1/stud-grad-assmts/paginated").param("studNo", "12345670")
@@ -209,14 +209,14 @@ public class TraxAPIControllerTest {
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_TRAX")
+  @WithMockOAuth2Scope(scope = "READ_PEN_TRAX")
   public void testGetTabSchool_GivenValidMincode_ShouldReturnStatusOK() throws Exception {
     this.mockMvc.perform(get("/api/v1/tab-schools").param("mincode", mincode)).andDo(print()).andExpect(status().isOk())
       .andExpect(MockMvcResultMatchers.jsonPath("$.schlName").value(tabSchoolEntity.getSchlName()));
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_TRAX")
+  @WithMockOAuth2Scope(scope = "READ_PEN_TRAX")
   public void testGetTabSchool_GivenNoExistMincode_ShouldReturnStatusNotFound() throws Exception {
     this.mockMvc.perform(get("/api/v1/tab-schools").param("mincode", "00123456")).andDo(print()).andExpect(status().isNotFound());
   }

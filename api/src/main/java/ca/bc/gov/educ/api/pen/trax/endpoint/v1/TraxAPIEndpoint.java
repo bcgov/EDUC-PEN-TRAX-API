@@ -22,7 +22,7 @@ import java.util.concurrent.CompletableFuture;
  */
 @RequestMapping("/api/v1")
 @OpenAPIDefinition(info = @Info(title = "API to TRAX CRU.", description = "This API is related to TRAX data.", version = "1"),
-  security = {@SecurityRequirement(name = "OAUTH2", scopes = {"READ_TRAX"})})
+  security = {@SecurityRequirement(name = "OAUTH2", scopes = {"READ_PEN_TRAX"})})
 public interface TraxAPIEndpoint {
   /**
    * Get student by studNo.
@@ -31,7 +31,7 @@ public interface TraxAPIEndpoint {
    * @return the Student
    */
   @GetMapping("/students")
-  @PreAuthorize("#oauth2.hasScope('READ_TRAX')")
+  @PreAuthorize("#oauth2.hasScope('READ_PEN_TRAX')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"), @ApiResponse(responseCode = "404", description = "NOT FOUND")})
   @Transactional(readOnly = true)
   @Tag(name = "Endpoint to get Student entity.", description = "Endpoint to get Student entity by studNo.")
@@ -40,7 +40,7 @@ public interface TraxAPIEndpoint {
 
   @GetMapping("/stud-xcrses/paginated")
   @Async
-  @PreAuthorize("#oauth2.hasScope('READ_TRAX')")
+  @PreAuthorize("#oauth2.hasScope('READ_PEN_TRAX')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"), @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR.")})
   @Transactional(readOnly = true)
   @Tag(name = "Endpoint to get StudXcrse entities, with sort and pagination.", description = "Endpoint to get StudXcrse entities by StudNo.")
@@ -51,7 +51,7 @@ public interface TraxAPIEndpoint {
 
   @GetMapping("/prov-exams/paginated")
   @Async
-  @PreAuthorize("#oauth2.hasScope('READ_TRAX')")
+  @PreAuthorize("#oauth2.hasScope('READ_PEN_TRAX')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"), @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR.")})
   @Transactional(readOnly = true)
   @Tag(name = "Endpoint to get ProvExam entities, with sort and pagination.", description = "Endpoint to get ProvExam entities by StudNo.")
@@ -62,7 +62,7 @@ public interface TraxAPIEndpoint {
 
   @GetMapping("/stud-grad-assmts/paginated")
   @Async
-  @PreAuthorize("#oauth2.hasScope('READ_TRAX')")
+  @PreAuthorize("#oauth2.hasScope('READ_PEN_TRAX')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"), @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR.")})
   @Transactional(readOnly = true)
   @Tag(name = "Endpoint to get StudGradAssmt entities, with sort and pagination.", description = "Endpoint to get StudGradAssmt entities by StudNo.")
@@ -78,7 +78,7 @@ public interface TraxAPIEndpoint {
    * @return the TabSchool
    */
   @GetMapping("/tab-schools")
-  @PreAuthorize("#oauth2.hasScope('READ_TRAX')")
+  @PreAuthorize("#oauth2.hasScope('READ_PEN_TRAX')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"), @ApiResponse(responseCode = "404", description = "NOT FOUND")})
   @Transactional(readOnly = true)
   @Tag(name = "Endpoint to get TabSchool entity.", description = "Endpoint to get TabSchool entity by mincode.")
