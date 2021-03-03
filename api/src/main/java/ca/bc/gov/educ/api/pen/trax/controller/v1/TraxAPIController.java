@@ -14,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
@@ -26,7 +25,6 @@ import java.util.concurrent.CompletableFuture;
  * The type Trax api controller.
  */
 @RestController
-@EnableResourceServer
 @Slf4j
 public class TraxAPIController implements TraxAPIEndpoint {
   @Getter(AccessLevel.PRIVATE)
