@@ -4,7 +4,6 @@ import ca.bc.gov.educ.api.pen.trax.TraxApiResourceApplication;
 import ca.bc.gov.educ.api.pen.trax.exception.RestExceptionHandler;
 import ca.bc.gov.educ.api.pen.trax.model.*;
 import ca.bc.gov.educ.api.pen.trax.repository.*;
-import ca.bc.gov.educ.api.pen.trax.support.WithMockOAuth2Scope;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
@@ -13,6 +12,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -27,6 +27,7 @@ import java.util.Map;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -37,6 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {TraxApiResourceApplication.class})
+@AutoConfigureMockMvc
 @Slf4j
 @SuppressWarnings({"java:S112", "java:S100", "java:S1192","java:S2699"})
 public class TraxAPIControllerTest {
@@ -49,6 +51,7 @@ public class TraxAPIControllerTest {
   /**
    * The Mock mvc.
    */
+  @Autowired
   private MockMvc mockMvc;
 
   @Autowired
@@ -87,8 +90,6 @@ public class TraxAPIControllerTest {
   @Before
   public void setUp() throws IOException {
     MockitoAnnotations.openMocks(this);
-    mockMvc = MockMvcBuilders.standaloneSetup(controller)
-      .setControllerAdvice(new RestExceptionHandler()).build();
     studentEntity = studentRepository.save(createStudent(studentNo));
     studXcrseEntities = studXcrseRepository.saveAll(List.of(createStudXcrse(studentNo, "10"), createStudXcrse(studentNo, "11")));
     provExamEntities = provExamRepository.saveAll(List.of(createProvExam(studentNo, "12"), createProvExam(studentNo, "13")));
@@ -109,27 +110,30 @@ public class TraxAPIControllerTest {
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_PEN_TRAX")
   public void testGetStudent_GivenValidStudentNo_ShouldReturnStatusOK() throws Exception {
-    this.mockMvc.perform(get("/api/v1/students").param("studNo", studentNo)).andDo(print()).andExpect(status().isOk())
+    this.mockMvc.perform(get("/api/v1/students")
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_PEN_TRAX")))
+            .param("studNo", studentNo)).andDo(print()).andExpect(status().isOk())
       .andExpect(MockMvcResultMatchers.jsonPath("$.studGiven").value(studentEntity.getStudGiven()));
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_PEN_TRAX")
   public void testGetStudent_GivenNoExistStudentNo_ShouldReturnStatusNotFound() throws Exception {
-    this.mockMvc.perform(get("/api/v1/students").param("studNo", "12345670")).andDo(print()).andExpect(status().isNotFound());
+    this.mockMvc.perform(get("/api/v1/students")
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_PEN_TRAX")))
+            .param("studNo", "12345670")).andDo(print()).andExpect(status().isNotFound());
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_PEN_TRAX")
   public void testFindStudXcrse_GivenValidStudentNo_ShouldReturnStatusOK() throws Exception {
     Map<String, String> sortMap = new HashMap<>();
     sortMap.put("studXcrseId.crseLevel", "DESC");
     String sort = new ObjectMapper().writeValueAsString(sortMap);
 
     MvcResult result = mockMvc
-      .perform(get("/api/v1/stud-xcrses/paginated").param("studNo", studentNo)
+      .perform(get("/api/v1/stud-xcrses/paginated")
+              .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_PEN_TRAX")))
+              .param("studNo", studentNo)
         .param("sort", sort)
         .contentType(APPLICATION_JSON))
       .andReturn();
@@ -139,10 +143,11 @@ public class TraxAPIControllerTest {
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_PEN_TRAX")
   public void testFindStudXcrse_GivenNoExistStudentNo_ShouldReturnStatusOK() throws Exception {
     MvcResult result = mockMvc
-      .perform(get("/api/v1/stud-xcrses/paginated").param("studNo", "12345670")
+      .perform(get("/api/v1/stud-xcrses/paginated")
+              .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_PEN_TRAX")))
+              .param("studNo", "12345670")
         .contentType(APPLICATION_JSON))
       .andReturn();
 
@@ -151,14 +156,15 @@ public class TraxAPIControllerTest {
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_PEN_TRAX")
   public void testFindProvExam_GivenValidStudentNo_ShouldReturnStatusOK() throws Exception {
     Map<String, String> sortMap = new HashMap<>();
     sortMap.put("provExamId.crseLevel", "DESC");
     String sort = new ObjectMapper().writeValueAsString(sortMap);
 
     MvcResult result = mockMvc
-      .perform(get("/api/v1/prov-exams/paginated").param("studNo", studentNo)
+      .perform(get("/api/v1/prov-exams/paginated")
+              .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_PEN_TRAX")))
+              .param("studNo", studentNo)
         .param("sort", sort)
         .contentType(APPLICATION_JSON))
       .andReturn();
@@ -168,10 +174,11 @@ public class TraxAPIControllerTest {
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_PEN_TRAX")
   public void testFindProvExam_GivenNoExistStudentNo_ShouldReturnStatusOK() throws Exception {
     MvcResult result = mockMvc
-      .perform(get("/api/v1/prov-exams/paginated").param("studNo", "12345670")
+      .perform(get("/api/v1/prov-exams/paginated")
+              .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_PEN_TRAX")))
+              .param("studNo", "12345670")
         .contentType(APPLICATION_JSON))
       .andReturn();
 
@@ -180,14 +187,15 @@ public class TraxAPIControllerTest {
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_PEN_TRAX")
   public void testFindStudGradAssmt_GivenValidStudentNo_ShouldReturnStatusOK() throws Exception {
     Map<String, String> sortMap = new HashMap<>();
     sortMap.put("studGradAssmtId.assmtCode", "DESC");
     String sort = new ObjectMapper().writeValueAsString(sortMap);
 
     MvcResult result = mockMvc
-      .perform(get("/api/v1/stud-grad-assmts/paginated").param("studNo", studentNo)
+      .perform(get("/api/v1/stud-grad-assmts/paginated")
+              .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_PEN_TRAX")))
+              .param("studNo", studentNo)
         .param("sort", sort)
         .contentType(APPLICATION_JSON))
       .andReturn();
@@ -197,10 +205,11 @@ public class TraxAPIControllerTest {
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_PEN_TRAX")
   public void testFindStudGradAssmt_GivenNoExistStudentNo_ShouldReturnStatusOK() throws Exception {
     MvcResult result = mockMvc
-      .perform(get("/api/v1/stud-grad-assmts/paginated").param("studNo", "12345670")
+      .perform(get("/api/v1/stud-grad-assmts/paginated")
+              .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_PEN_TRAX")))
+              .param("studNo", "12345670")
         .contentType(APPLICATION_JSON))
       .andReturn();
 
@@ -209,16 +218,18 @@ public class TraxAPIControllerTest {
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_PEN_TRAX")
   public void testGetTabSchool_GivenValidMincode_ShouldReturnStatusOK() throws Exception {
-    this.mockMvc.perform(get("/api/v1/tab-schools").param("mincode", mincode)).andDo(print()).andExpect(status().isOk())
+    this.mockMvc.perform(get("/api/v1/tab-schools")
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_PEN_TRAX")))
+            .param("mincode", mincode)).andDo(print()).andExpect(status().isOk())
       .andExpect(MockMvcResultMatchers.jsonPath("$.schlName").value(tabSchoolEntity.getSchlName()));
   }
 
   @Test
-  @WithMockOAuth2Scope(scope = "READ_PEN_TRAX")
   public void testGetTabSchool_GivenNoExistMincode_ShouldReturnStatusNotFound() throws Exception {
-    this.mockMvc.perform(get("/api/v1/tab-schools").param("mincode", "00123456")).andDo(print()).andExpect(status().isNotFound());
+    this.mockMvc.perform(get("/api/v1/tab-schools")
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_PEN_TRAX")))
+            .param("mincode", "00123456")).andDo(print()).andExpect(status().isNotFound());
   }
 
   private StudentEntity createStudent(String studentNo) {
