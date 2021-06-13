@@ -19,16 +19,16 @@ public class TraxAPIMVCConfig implements WebMvcConfigurer {
    * The TRAX api interceptor.
    */
   @Getter(AccessLevel.PRIVATE)
-  private final TraxAPIInterceptor traxAPIInterceptor;
+  private final RequestResponseInterceptor requestResponseInterceptor;
 
   /**
    * Instantiates a new TRAX api mvc config.
    *
-   * @param traxAPIInterceptor the School api interceptor
+   * @param requestResponseInterceptor the School api interceptor
    */
   @Autowired
-  public TraxAPIMVCConfig(final TraxAPIInterceptor traxAPIInterceptor) {
-    this.traxAPIInterceptor = traxAPIInterceptor;
+  public TraxAPIMVCConfig(final RequestResponseInterceptor requestResponseInterceptor) {
+    this.requestResponseInterceptor = requestResponseInterceptor;
   }
 
   /**
@@ -38,6 +38,6 @@ public class TraxAPIMVCConfig implements WebMvcConfigurer {
    */
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
-    registry.addInterceptor(traxAPIInterceptor).addPathPatterns("/**");
+    registry.addInterceptor(requestResponseInterceptor).addPathPatterns("/**");
   }
 }

@@ -14,7 +14,8 @@
     <sonar.exclusions>
       src/main/resources/**,src/main/java/ca/bc/gov/educ/api/pen/trax/endpoint/**,src/main/java/ca/bc/gov/educ/api/pen/trax/struct/**
       ,src/main/java/ca/bc/gov/educ/api/pen/trax/model/**,src/main/java/ca/bc/gov/educ/api/pen/trax/rest/**
-      ,src/main/java/ca/bc/gov/educ/api/pen/trax/messaging/**
+      ,src/main/java/ca/bc/gov/educ/api/pen/trax/messaging/**,
+      src/main/java/ca/bc/gov/educ/api/pen/trax/helpers/**,
     </sonar.exclusions>
     <java.version>11</java.version>
 
