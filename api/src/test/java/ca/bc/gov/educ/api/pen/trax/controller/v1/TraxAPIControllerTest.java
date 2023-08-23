@@ -1,7 +1,6 @@
 package ca.bc.gov.educ.api.pen.trax.controller.v1;
 
 import ca.bc.gov.educ.api.pen.trax.TraxApiResourceApplication;
-import ca.bc.gov.educ.api.pen.trax.exception.RestExceptionHandler;
 import ca.bc.gov.educ.api.pen.trax.model.*;
 import ca.bc.gov.educ.api.pen.trax.repository.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,11 +13,11 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -39,6 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {TraxApiResourceApplication.class})
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 @Slf4j
 @SuppressWarnings({"java:S112", "java:S100", "java:S1192","java:S2699"})
 public class TraxAPIControllerTest {
@@ -130,12 +130,12 @@ public class TraxAPIControllerTest {
     sortMap.put("studXcrseId.crseLevel", "DESC");
     String sort = new ObjectMapper().writeValueAsString(sortMap);
 
-    MvcResult result = mockMvc
+    MvcResult result = this.mockMvc
       .perform(get("/api/v1/stud-xcrses/paginated")
               .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_PEN_TRAX")))
               .param("studNo", studentNo)
         .param("sort", sort)
-        .contentType(APPLICATION_JSON))
+        .contentType(APPLICATION_JSON)).andDo(print())
       .andReturn();
 
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk())
@@ -230,6 +230,13 @@ public class TraxAPIControllerTest {
     this.mockMvc.perform(get("/api/v1/tab-schools")
             .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_PEN_TRAX")))
             .param("mincode", "00123456")).andDo(print()).andExpect(status().isNotFound());
+  }
+
+  @Test
+  public void testGetStudent_WithoutScope_ShouldReturnStatusForbidden() throws Exception {
+    this.mockMvc.perform(get("/api/v1/students")
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRONG_SCOPE")))
+            .param("studNo", studentNo)).andDo(print()).andExpect(status().isForbidden());
   }
 
   private StudentEntity createStudent(String studentNo) {
