@@ -10,5 +10,5 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface ProvExamRepository extends JpaRepository<ProvExamEntity, ProvExamId> {
-  int countAllByProvExamIdStudNo(String studNo);
+  Integer countAllByProvExamIdStudNo(String studNo);
 }
