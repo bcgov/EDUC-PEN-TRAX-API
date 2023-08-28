@@ -3,7 +3,6 @@ package ca.bc.gov.educ.api.pen.trax.controller.v1;
 import ca.bc.gov.educ.api.pen.trax.TraxApiResourceApplication;
 import ca.bc.gov.educ.api.pen.trax.model.*;
 import ca.bc.gov.educ.api.pen.trax.repository.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
 import org.junit.Before;
@@ -16,18 +15,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -125,96 +120,65 @@ public class TraxAPIControllerTest {
   }
 
   @Test
-  public void testFindStudXcrse_GivenValidStudentNo_ShouldReturnStatusOK() throws Exception {
-    Map<String, String> sortMap = new HashMap<>();
-    sortMap.put("studXcrseId.crseLevel", "DESC");
-    String sort = new ObjectMapper().writeValueAsString(sortMap);
+  public void testCountStudXcrse_GivenValidStudentNo_ShouldReturnStatusOK() throws Exception {
 
-    MvcResult result = this.mockMvc
-      .perform(get("/api/v1/stud-xcrses/paginated")
+    this.mockMvc
+        .perform(get("/api/v1/stud-xcrses/paginated")
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_PEN_TRAX")))
+            .param("studNo", studentNo)
+            .contentType(APPLICATION_JSON)).andDo(print())
+        .andExpect(MockMvcResultMatchers.jsonPath("$.totalElements", is(2)));
+  }
+
+  @Test
+  public void testCountStudXcrse_GivenNoExistStudentNo_ShouldReturnStatusOK() throws Exception {
+
+    this.mockMvc
+        .perform(get("/api/v1/stud-xcrses/paginated")
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_PEN_TRAX")))
+            .param("studNo", "12345670")
+            .contentType(APPLICATION_JSON)).andDo(print())
+        .andExpect(MockMvcResultMatchers.jsonPath("$.totalElements", is(0)));
+  }
+
+  @Test
+  public void testCountProvExam_GivenValidStudentNo_ShouldReturnStatusOK() throws Exception {
+    this.mockMvc
+      .perform(get("/api/v1/prov-exams/paginated")
               .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_PEN_TRAX")))
               .param("studNo", studentNo)
-        .param("sort", sort)
         .contentType(APPLICATION_JSON)).andDo(print())
-      .andReturn();
-
-    this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk())
-      .andExpect(MockMvcResultMatchers.jsonPath("$.content", hasSize(2)));
+        .andExpect(MockMvcResultMatchers.jsonPath("$.totalElements", is(2)));
   }
 
   @Test
-  public void testFindStudXcrse_GivenNoExistStudentNo_ShouldReturnStatusOK() throws Exception {
-    MvcResult result = mockMvc
-      .perform(get("/api/v1/stud-xcrses/paginated")
-              .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_PEN_TRAX")))
-              .param("studNo", "12345670")
-        .contentType(APPLICATION_JSON))
-      .andReturn();
-
-    this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk())
-      .andExpect(MockMvcResultMatchers.jsonPath("$.content", hasSize(0)));
+  public void testCountProvExam_GivenNoExistStudentNo_ShouldReturnStatusOK() throws Exception {
+    this.mockMvc
+        .perform(get("/api/v1/prov-exams/paginated")
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_PEN_TRAX")))
+            .param("studNo", "12345670")
+            .contentType(APPLICATION_JSON)).andDo(print())
+        .andExpect(MockMvcResultMatchers.jsonPath("$.totalElements", is(0)));
   }
 
   @Test
-  public void testFindProvExam_GivenValidStudentNo_ShouldReturnStatusOK() throws Exception {
-    Map<String, String> sortMap = new HashMap<>();
-    sortMap.put("provExamId.crseLevel", "DESC");
-    String sort = new ObjectMapper().writeValueAsString(sortMap);
-
-    MvcResult result = mockMvc
-      .perform(get("/api/v1/prov-exams/paginated")
-              .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_PEN_TRAX")))
-              .param("studNo", studentNo)
-        .param("sort", sort)
-        .contentType(APPLICATION_JSON))
-      .andReturn();
-
-    this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk())
-      .andExpect(MockMvcResultMatchers.jsonPath("$.content", hasSize(2)));
-  }
-
-  @Test
-  public void testFindProvExam_GivenNoExistStudentNo_ShouldReturnStatusOK() throws Exception {
-    MvcResult result = mockMvc
-      .perform(get("/api/v1/prov-exams/paginated")
-              .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_PEN_TRAX")))
-              .param("studNo", "12345670")
-        .contentType(APPLICATION_JSON))
-      .andReturn();
-
-    this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk())
-      .andExpect(MockMvcResultMatchers.jsonPath("$.content", hasSize(0)));
-  }
-
-  @Test
-  public void testFindStudGradAssmt_GivenValidStudentNo_ShouldReturnStatusOK() throws Exception {
-    Map<String, String> sortMap = new HashMap<>();
-    sortMap.put("studGradAssmtId.assmtCode", "DESC");
-    String sort = new ObjectMapper().writeValueAsString(sortMap);
-
-    MvcResult result = mockMvc
+  public void testCountStudGradAssmt_GivenValidStudentNo_ShouldReturnStatusOK() throws Exception {
+    this.mockMvc
       .perform(get("/api/v1/stud-grad-assmts/paginated")
               .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_PEN_TRAX")))
               .param("studNo", studentNo)
-        .param("sort", sort)
-        .contentType(APPLICATION_JSON))
-      .andReturn();
-
-    this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk())
-      .andExpect(MockMvcResultMatchers.jsonPath("$.content", hasSize(2)));
+        .contentType(APPLICATION_JSON)).andDo(print())
+        .andExpect(MockMvcResultMatchers.jsonPath("$.totalElements", is(2)));
   }
 
   @Test
-  public void testFindStudGradAssmt_GivenNoExistStudentNo_ShouldReturnStatusOK() throws Exception {
-    MvcResult result = mockMvc
-      .perform(get("/api/v1/stud-grad-assmts/paginated")
-              .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_PEN_TRAX")))
-              .param("studNo", "12345670")
-        .contentType(APPLICATION_JSON))
-      .andReturn();
-
-    this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk())
-      .andExpect(MockMvcResultMatchers.jsonPath("$.content", hasSize(0)));
+  public void testCountStudGradAssmt_GivenNoExistStudentNo_ShouldReturnStatusOK() throws Exception {
+    this.mockMvc
+        .perform(get("/api/v1/stud-grad-assmts/paginated")
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "READ_PEN_TRAX")))
+            .param("studNo", "12345670")
+            .contentType(APPLICATION_JSON)).andDo(print())
+        .andExpect(MockMvcResultMatchers.jsonPath("$.totalElements", is(0)));
   }
 
   @Test
