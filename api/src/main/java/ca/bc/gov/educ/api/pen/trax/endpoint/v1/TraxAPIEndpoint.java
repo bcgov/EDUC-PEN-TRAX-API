@@ -8,13 +8,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.data.domain.Page;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.concurrent.CompletableFuture;
 
 
 /**
@@ -38,38 +34,33 @@ public interface TraxAPIEndpoint {
   @Schema(name = "Student", implementation = Student.class)
   Student getStudentByStudNo(@RequestParam("studNo")  String studNo);
 
+  /**
+   * The following 3 endpoints are not paginated. The URL was kept to be compatible with EDUC-STUDENT-ADMIN. Pagination with RDB broke during the springboot upgrade to 3.0.2.
+   * So the team decided to pivot to this solution.
+   *
+   * @param studNo the studNo
+   * @return the TotalElements count
+   */
   @GetMapping("/stud-xcrses/paginated")
-  @Async
   @PreAuthorize("hasAuthority('SCOPE_READ_PEN_TRAX')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"), @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR.")})
   @Transactional(readOnly = true)
-  @Tag(name = "Endpoint to get StudXcrse entities, with sort and pagination.", description = "Endpoint to get StudXcrse entities by StudNo.")
-  CompletableFuture<Page<StudXcrse>> findStudXcrsesByStudNo(@RequestParam("studNo") String studNo,
-                                                            @RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
-                                                            @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
-                                                            @RequestParam(name = "sort", defaultValue = "") String sortCriteriaJson);
+  @Tag(name = "Endpoint to get StudXcrse count", description = "Endpoint to get StudXcrse count by StudNo.")
+  TotalElements countStudXcrsesByStudNo(@RequestParam("studNo") String studNo);
 
   @GetMapping("/prov-exams/paginated")
-  @Async
   @PreAuthorize("hasAuthority('SCOPE_READ_PEN_TRAX')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"), @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR.")})
   @Transactional(readOnly = true)
-  @Tag(name = "Endpoint to get ProvExam entities, with sort and pagination.", description = "Endpoint to get ProvExam entities by StudNo.")
-  CompletableFuture<Page<ProvExam>> findProvExamsByStudNo(@RequestParam("studNo") String studNo,
-                                                          @RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
-                                                          @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
-                                                          @RequestParam(name = "sort", defaultValue = "") String sortCriteriaJson);
+  @Tag(name = "Endpoint to get ProvExam count.", description = "Endpoint to get ProvExam count by StudNo.")
+  TotalElements countProvExamsByStudNo(@RequestParam("studNo") String studNo);
 
   @GetMapping("/stud-grad-assmts/paginated")
-  @Async
   @PreAuthorize("hasAuthority('SCOPE_READ_PEN_TRAX')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"), @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR.")})
   @Transactional(readOnly = true)
-  @Tag(name = "Endpoint to get StudGradAssmt entities, with sort and pagination.", description = "Endpoint to get StudGradAssmt entities by StudNo.")
-  CompletableFuture<Page<StudGradAssmt>> findStudGradAssmtsByStudNo(@RequestParam("studNo") String studNo,
-                                                                    @RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
-                                                                    @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
-                                                                    @RequestParam(name = "sort", defaultValue = "") String sortCriteriaJson);
+  @Tag(name = "Endpoint to get StudGradAssmt count.", description = "Endpoint to get StudGradAssmt count by StudNo.")
+  TotalElements countStudGradAssmtsByStudNo(@RequestParam("studNo") String studNo);
 
   /**
    * Get school by mincode.
